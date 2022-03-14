@@ -8,7 +8,12 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
-      webviewTag: true
+      webviewTag: true,
+
+      // ensure we are using secure settings
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false
     }
   })
 
