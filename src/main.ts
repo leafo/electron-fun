@@ -21,6 +21,13 @@ const createWindow = () => {
   win.webContents.openDevTools()
 }
 
+app.on("web-contents-created", (event, contents) => {
+  console.log("Created web contents", `${contents.id}-${contents.getTitle()}`)
+  contents.on("will-navigate", (event, url) => {
+    console.log("navigating to url:" + url)
+  })
+})
+
 app.whenReady().then(() => {
   createWindow()
 
