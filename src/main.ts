@@ -1,6 +1,27 @@
-const {app, BrowserWindow} = require("electron")
-
+const {app, BrowserWindow, ipcMain} = require("electron")
 const path = require("path")
+
+import { Client, Instance } from "butlerd";
+import { createRequest, createNotification } from "butlerd/lib/support";
+
+const makeButlerClient = async () => {
+  const dbPath = path.join(app.getPath("userData"), "db", "butler.db")
+  const itchioURL = "https://itch.io"
+
+  let args = [
+    "--dbpath", dbPath,
+    "--address", itchioURL,
+    "--user-agent", "itch/999.9",
+    "--destiny-pid", `${process.pid}`,
+  ];
+
+  const butlerInstance = new Instance({
+    butlerExecutable: "/home/leafo/bin/butler",
+    args,
+  })
+
+  return new Client(await butlerInstance.getEndpoint())
+}
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -22,7 +43,7 @@ const createWindow = () => {
 }
 
 app.on("web-contents-created", (event, contents) => {
-  console.log("Created web contents", `${contents.id}-${contents.getTitle()}`)
+  // console.log("Created web contents", `${contents.id}-${contents.getTitle()}`)
   contents.on("will-navigate", (event, url) => {
     console.log("navigating to url:" + url)
   })
@@ -30,6 +51,18 @@ app.on("web-contents-created", (event, contents) => {
 
 app.whenReady().then(() => {
   createWindow()
+
+  const butlerPromise = makeButlerClient()
+
+  ipcMain.handle("butler:Version.Get", async () => {
+    const butler = (await butlerPromise)
+    return await butler.call(createRequest("Version.Get"), {})
+  })
+
+  // .then(async butler => {
+  //   const res = await butler.call(createRequest("Version.Get"), {})
+  //   console.log(res)
+  // })
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

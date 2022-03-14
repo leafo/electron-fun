@@ -1,5 +1,5 @@
 
-import { contextBridge } from "electron"
+import { contextBridge, ipcRenderer } from "electron"
 
 const versions = {}
 
@@ -8,4 +8,8 @@ for (const dependency of ["chrome", "node", "electron"]) {
 }
 
 contextBridge.exposeInMainWorld("Versions", versions)
+
+contextBridge.exposeInMainWorld("Butler", {
+	getVersion: () => ipcRenderer.invoke("butler:Version.Get")
+})
 
