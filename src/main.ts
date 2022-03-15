@@ -13,14 +13,22 @@ const makeButlerClient = async () => {
     "--address", itchioURL,
     "--user-agent", "itch/999.9",
     "--destiny-pid", `${process.pid}`,
+    "--log"
   ];
 
   const butlerInstance = new Instance({
     butlerExecutable: "/home/leafo/bin/butler",
+    log: console.log,
     args,
   })
 
-  return new Client(await butlerInstance.getEndpoint())
+  const client = await new Client(await butlerInstance.getEndpoint())
+
+  client.onWarning((msg) => {
+    logger.warn(`(butlerd) ${msg}`);
+  });
+
+  return client
 }
 
 const createWindow = () => {
@@ -59,10 +67,11 @@ app.whenReady().then(() => {
     return await butler.call(createRequest("Version.Get"), {})
   })
 
-  // .then(async butler => {
-  //   const res = await butler.call(createRequest("Version.Get"), {})
-  //   console.log(res)
-  // })
+  ipcMain.handle("butler:call", async (e, method, params) => {
+    const butler = (await butlerPromise)
+    const res = await butler.call(createRequest(method), params)
+    return res
+  })
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

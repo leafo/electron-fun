@@ -17,7 +17,7 @@ const AddressBar = styled.div`
 
 AddressBar.displayName = "AddressBar"
 
-class ButlerVersion extends PureComponent{
+class ButlerVersion extends PureComponent {
   constructor() {
     super()
     this.state = { loading: true }
@@ -28,11 +28,37 @@ class ButlerVersion extends PureComponent{
   }
 
   componentDidMount() {
-    console.log(Butler.getVersion().then(response => {
+    Butler.getVersion().then(response => {
       this.setState(Object.assign({ loading: false }, response))
       console.log("got response", response)
-    }))
+    })
   }
+}
+
+class ProfileList extends PureComponent {
+  constructor() {
+    super()
+    this.state = { loading: true }
+  }
+
+  render() {
+    if (this.state.loading) {
+      return null
+    }
+
+    return <ul className="ProfileList">{
+      this.state.profiles.map(profile => {
+        return <li key={profile.id}>{profile.user.username}</li>
+      })
+    }</ul>
+  }
+
+  async componentDidMount() {
+    this.setState(Object.assign({
+      loading: false
+    }, await Butler.call("Profile.List")))
+  }
+
 }
 
 class EmbeddedBrowser extends PureComponent {
@@ -131,6 +157,7 @@ class App extends PureComponent {
       </ul>
 
       <ButlerVersion />
+      <ProfileList />
       <EmbeddedBrowser src="https://itch.io" />
     </div>
   }

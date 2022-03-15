@@ -10,6 +10,7 @@ for (const dependency of ["chrome", "node", "electron"]) {
 contextBridge.exposeInMainWorld("Versions", versions)
 
 contextBridge.exposeInMainWorld("Butler", {
-	getVersion: () => ipcRenderer.invoke("butler:Version.Get")
+	getVersion: () => ipcRenderer.invoke("butler:Version.Get"),
+	call: (method, params={}) => ipcRenderer.invoke("butler:call", method, params)
 })
 
