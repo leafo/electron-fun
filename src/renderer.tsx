@@ -1,10 +1,17 @@
 
-import {PureComponent} from "react"
+
+import React, {PureComponent} from "react"
 import {render} from "react-dom"
+
+import { HashRouter, Routes, Route, Link, NavLink } from "react-router-dom"
 
 import styled from 'styled-components'
 
 import "./style/renderer.css"
+
+import { setGlobalState } from "renderer/state"
+
+import Header from "renderer/components/header"
 
 const AddressBar = styled.div`
   display: flex;
@@ -14,8 +21,6 @@ const AddressBar = styled.div`
     flex: 1;
   }
 `
-
-AddressBar.displayName = "AddressBar"
 
 class ButlerVersion extends PureComponent {
   constructor() {
@@ -30,7 +35,6 @@ class ButlerVersion extends PureComponent {
   componentDidMount() {
     Butler.getVersion().then(response => {
       this.setState(Object.assign({ loading: false }, response))
-      console.log("got response", response)
     })
   }
 }
@@ -48,9 +52,28 @@ class ProfileList extends PureComponent {
 
     return <ul className="ProfileList">{
       this.state.profiles.map(profile => {
-        return <li key={profile.id}>{profile.user.username}</li>
+        return <li key={profile.id}>{this.renderProfileButton(profile)}</li>
       })
     }</ul>
+  }
+
+  renderProfileButton(profile) {
+    return <button onClick={e => {
+      this.activateProfile(profile)
+    }}>
+      {profile.user.username}
+    </button>
+  }
+
+  async activateProfile(profile) {
+    const res = await Butler.call("Profile.UseSavedLogin", {
+      profileId: profile.id
+    })
+
+    // successfully connected
+    if (res.profile) {
+      setGlobalState({ currentProfile: res.profile })
+    }
   }
 
   async componentDidMount() {
@@ -58,7 +81,6 @@ class ProfileList extends PureComponent {
       loading: false
     }, await Butler.call("Profile.List")))
   }
-
 }
 
 class EmbeddedBrowser extends PureComponent {
@@ -145,21 +167,23 @@ class EmbeddedBrowser extends PureComponent {
 
 class App extends PureComponent {
   render() {
-    return <div>
-      <p>Hello world from react test two</p>
+    return <HashRouter>
+      <Header />
+      <Routes>
+        <Route path="/profiles" element={<ProfileList />} />
+        <Route path="/browser" element={<EmbeddedBrowser src="https://itch.io" />} />
+        <Route path="/versions" element={
+          <div>
+            <ul>
+              <li>Chrome: {Versions.chrome}</li>
+              <li>Node: {Versions.node}</li>
+              <li>Electron: {Versions.electron}</li>
+            </ul>
+          </div>
+        } />
+      </Routes>
 
-      <p>Some versions</p>
-
-      <ul>
-        <li>Chrome: {Versions.chrome}</li>
-        <li>Node: {Versions.node}</li>
-        <li>Electron: {Versions.electron}</li>
-      </ul>
-
-      <ButlerVersion />
-      <ProfileList />
-      <EmbeddedBrowser src="https://itch.io" />
-    </div>
+    </HashRouter>
   }
 }
 
