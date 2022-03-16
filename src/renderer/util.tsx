@@ -1,6 +1,8 @@
-import {useState, useEffect} from "react"
+import { useState, useEffect } from "react"
 import { useLocation } from "react-router-dom"
+import { useGlobalState } from "renderer/state"
 
+// TODO: apparently this is inclued in react-router-dom
 export const useSearchParams = () => {
   const { search } = useLocation();
   return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -31,6 +33,20 @@ export const useDebounce = (value, timeout=150) => {
   }, [value, timeout])
 
   return debouncedValue
+}
+
+export const withProfile = (C) => {
+  let _withProfile = (props) => {
+    const [profile] = useGlobalState("currentProfile")
+
+    if (profile) {
+      return <C {...props} profile={profile} />
+    } else {
+      return null
+    }
+  }
+
+  return _withProfile
 }
 
 
