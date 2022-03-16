@@ -32,7 +32,13 @@ const HeaderDiv = styled.div`
 
 const CurrentLocation = () => {
   const location = useLocation()
-  return <span className="currentLocation" title={window.location.toString()}>{location.pathname}</span>
+
+  let fullPath = location.pathname
+  if (location.search) {
+    fullPath += location.search
+  }
+
+  return <span className="currentLocation" title={window.location.toString()}>{fullPath}</span>
 }
 
 const CurrentUser = (props) => {

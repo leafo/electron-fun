@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import "./style/renderer.css"
 import { setGlobalState } from "renderer/state"
 import Header from "renderer/components/header"
-import {ProfileCollections} from "renderer/components/collections"
+import CollectionsPage from "renderer/components/collections"
 
 const AddressBar = styled.div`
   display: flex;
@@ -190,7 +190,8 @@ class App extends React.PureComponent {
       <Header />
       <Routes>
         <Route path="/profiles" element={<ProfileList />} />
-        <Route path="/collections" element={<ProfileCollections />} />
+        <Route path="/collections" element={<CollectionsPage />} />
+        <Route path="/collections/:collectionId" element={<CollectionsPage />} />
         <Route path="/browser" element={<EmbeddedBrowser src="https://itch.io" />} />
         <Route path="/versions" element={
           <div>
