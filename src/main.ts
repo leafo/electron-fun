@@ -17,7 +17,7 @@ const makeButlerClient = async () => {
   ];
 
   const butlerInstance = new Instance({
-    butlerExecutable: "/home/leafo/bin/butler",
+    butlerExecutable: "/home/leafo/.config/itch/broth/butler/versions/15.21.0/butler",
     log: console.log,
     args,
   })
@@ -25,7 +25,7 @@ const makeButlerClient = async () => {
   const client = await new Client(await butlerInstance.getEndpoint())
 
   client.onWarning((msg) => {
-    logger.warn(`(butlerd) ${msg}`);
+    console.log(`(butlerd) ${msg}`);
   });
 
   return client
