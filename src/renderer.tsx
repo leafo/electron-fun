@@ -1,5 +1,3 @@
-
-
 import React from "react"
 import {render} from "react-dom"
 
@@ -12,15 +10,7 @@ import Header from "renderer/components/header"
 
 import CollectionsPage from "renderer/components/collections"
 import CollectionPage from "renderer/components/collection"
-
-const AddressBar = styled.div`
-  display: flex;
-  gap: 5px;
-
-  .input {
-    flex: 1;
-  }
-`
+import EmbeddedBrowser from "renderer/components/browser"
 
 class ButlerVersion extends React.PureComponent {
   constructor() {
@@ -29,13 +19,12 @@ class ButlerVersion extends React.PureComponent {
   }
 
   render() {
-    return <div>{this.state.loading ? "Loading" : <code>{this.state.versionString}</code>}</div>
+    return <span>{this.state.loading ? "Loading" : <code>{this.state.versionString}</code>}</span>
   }
 
-  componentDidMount() {
-    Butler.getVersion().then(response => {
-      this.setState(Object.assign({ loading: false }, response))
-    })
+  async componentDidMount() {
+    const response = await Butler.getVersion()
+    this.setState({loading: false, ...response})
   }
 }
 
@@ -49,8 +38,6 @@ class ProfileList extends React.PureComponent {
     if (this.state.loading) {
       return null
     }
-
-    console.log(this.state.profiles)
 
     return <ul className="ProfileList">{
       this.state.profiles.map(profile => {
@@ -89,88 +76,6 @@ class ProfileList extends React.PureComponent {
   }
 }
 
-class EmbeddedBrowser extends React.PureComponent {
-  constructor() {
-    super()
-    this.state = {}
-  }
-
-  // refresh state from webview
-  refreshState(e) {
-    const webview = this.webviewRef.current;
-    if (!webview) return
-
-    this.setState({
-      displayURL: e.url || webview.src,
-      canGoBack: webview.canGoBack(),
-      canGoForward: webview.canGoForward()
-    })
-  }
-
-  componentDidMount() {
-    const webview = this.webviewRef.current;
-    webview.addEventListener("did-navigate", e => {
-      this.refreshState(e)
-    })
-
-    webview.addEventListener("will-navigate", e => {
-      this.refreshState(e)
-    })
-
-    webview.addEventListener("did-start-loading", e => {
-      this.setState({
-        loading: true
-      })
-    })
-
-    webview.addEventListener("did-stop-loading", e => {
-      this.setState({
-        loading: false
-      })
-    })
-  }
-
-  render() {
-    return <div
-      style={{
-        border: this.state.loading ? "2px solid red" : "2px solid gray"
-      }}
-      className="browser">
-      <AddressBar>
-        <button
-          type="button"
-          disabled={!this.state.canGoBack}
-          onClick={e => {
-            this.webviewRef.current?.goBack()
-          }}>Back</button>
-
-        <button
-          type="button"
-          disabled={!this.state.canGoForward}
-          onClick={e => {
-            this.webviewRef.current?.goForward()
-          }}>Forward</button>
-
-        <input className="input" type="text" readOnly value={this.state.displayURL || ""} />
-
-        <button
-          type="button"
-          onClick={e => {
-            this.webviewRef.current?.openDevTools()
-          }}>Open Devtools</button>
-      </AddressBar>
-
-      <webview
-        ref={this.webviewRef ||= React.createRef()}
-        src={this.props.src}
-        style={{
-          width: "100%",
-          height: "400px"
-        }}/>
-    </div>
-  }
-}
-
 class App extends React.PureComponent {
   // force load first profile for now
   async componentDidMount() {
@@ -194,13 +99,14 @@ class App extends React.PureComponent {
         <Route path="/profiles" element={<ProfileList />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/collections/:collectionId" element={<CollectionPage />} />
-        <Route path="/browser" element={<EmbeddedBrowser src="https://itch.io" />} />
+        <Route path="/browser" element={<EmbeddedBrowser defaultSrc="https://itch.io" />} />
         <Route path="/versions" element={
           <div>
             <ul>
               <li>Chrome: {Versions.chrome}</li>
               <li>Node: {Versions.node}</li>
               <li>Electron: {Versions.electron}</li>
+              <li>Butler: <ButlerVersion /></li>
             </ul>
           </div>
         } />

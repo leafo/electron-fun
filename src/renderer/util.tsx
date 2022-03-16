@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useSearchParams } from "react-router-dom"
 import { useGlobalState } from "renderer/state"
-
-// TODO: apparently this is inclued in react-router-dom
-export const useSearchParams = () => {
-  const { search } = useLocation();
-  return React.useMemo(() => new URLSearchParams(search), [search]);
-
-}
 
 export const updatedSearchParams = (params, obj) => {
   const newParams = new URLSearchParams([...params])
@@ -49,4 +42,17 @@ export const withProfile = (C) => {
   return _withProfile
 }
 
+
+// pulls names from search params and converts them into props
+export const withSearchParams = (C, names=[]) => {
+  const _withSearchParams = (props) => {
+    const [params] = useSearchParams()
+
+    const paramsProps = {}
+    names.forEach(k => { paramsProps[k] = params.get(k) })
+    return <C {...props} {...paramsProps} />
+  }
+
+  return _withSearchParams
+}
 

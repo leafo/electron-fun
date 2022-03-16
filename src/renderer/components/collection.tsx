@@ -2,7 +2,7 @@
 import styled from 'styled-components'
 import React, { useState, useEffect } from "react"
 
-import { useParams } from 'react-router-dom'
+import { useParams, createSearchParams, Link } from 'react-router-dom'
 import { useButlerCall } from "renderer/butler"
 import { withProfile } from 'renderer/util'
 
@@ -29,8 +29,9 @@ const withCollection = (C) => {
 const CollectionGamesList = (props) => {
   return <ul>
     {props.items.map(cg => {
+      const gameUrl = `/browser?${createSearchParams({url: cg.game.url})}`
       return <li key={`cg-${cg.collectionId}-${cg.gameId}`}>
-        <a href={cg.game.url}>{cg.game.title}</a>
+        <Link to={gameUrl}>{cg.game.title}</Link>
       </li>
     })}
   </ul>

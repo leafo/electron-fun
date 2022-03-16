@@ -55,6 +55,10 @@ app.on("web-contents-created", (event, contents) => {
   contents.on("will-navigate", (event, url) => {
     console.log("navigating to url:" + url)
   })
+
+  contents.on("will-attach-webview", (event, wp, params) => {
+    console.log("will-attach-webview", params)
+  })
 })
 
 app.whenReady().then(() => {

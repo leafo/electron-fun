@@ -2,11 +2,11 @@
 import styled from 'styled-components'
 import React, { useState, useEffect } from "react"
 
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { useButlerCall } from "renderer/butler"
 
-import { useSearchParams, useDebounce, updatedSearchParams, withProfile } from "renderer/util"
+import { useDebounce, updatedSearchParams, withProfile } from "renderer/util"
 
 CollectionsPageSection = styled.section`
 `
@@ -17,8 +17,8 @@ class CollectionList extends React.PureComponent {
     let collections = this.props.items.map(c =>
       <li key={c.id}>
         <Link to={`/collections/${c.id}`}>
-          {c.title} ({c.gamesCount})
-        </Link>
+          {c.title}
+        </Link> ({c.gamesCount})
       </li>
     )
     return <ul>{collections}</ul>
@@ -26,7 +26,7 @@ class CollectionList extends React.PureComponent {
 }
 
 const ProfileCollections = withProfile((props) => {
-  const params = useSearchParams()
+  const [params] = useSearchParams()
 
   const res = useButlerCall("Fetch.ProfileCollections", {
     profileId: props.profile.id,
@@ -45,7 +45,7 @@ const SearchInput = (props) => {
 
   const debouncedValue = useDebounce(value)
 
-  const params = useSearchParams()
+  const [params] = useSearchParams()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const SearchInput = (props) => {
 }
 
 export default CollectionsPage = (props) => {
-  const params = useSearchParams()
+  const [params] = useSearchParams()
 
   return <CollectionsPageSection>
     <div>
