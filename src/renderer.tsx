@@ -1,17 +1,15 @@
 
 
-import React, {PureComponent} from "react"
+import React from "react"
 import {render} from "react-dom"
 
 import { HashRouter, Routes, Route, Link, NavLink } from "react-router-dom"
 
 import styled from 'styled-components'
-
 import "./style/renderer.css"
-
 import { setGlobalState } from "renderer/state"
-
 import Header from "renderer/components/header"
+import {ProfileCollections} from "renderer/components/collections"
 
 const AddressBar = styled.div`
   display: flex;
@@ -22,7 +20,7 @@ const AddressBar = styled.div`
   }
 `
 
-class ButlerVersion extends PureComponent {
+class ButlerVersion extends React.PureComponent {
   constructor() {
     super()
     this.state = { loading: true }
@@ -39,7 +37,7 @@ class ButlerVersion extends PureComponent {
   }
 }
 
-class ProfileList extends PureComponent {
+class ProfileList extends React.PureComponent {
   constructor() {
     super()
     this.state = { loading: true }
@@ -50,6 +48,8 @@ class ProfileList extends PureComponent {
       return null
     }
 
+    console.log(this.state.profiles)
+
     return <ul className="ProfileList">{
       this.state.profiles.map(profile => {
         return <li key={profile.id}>{this.renderProfileButton(profile)}</li>
@@ -58,11 +58,15 @@ class ProfileList extends PureComponent {
   }
 
   renderProfileButton(profile) {
-    return <button onClick={e => {
-      this.activateProfile(profile)
-    }}>
-      {profile.user.username}
-    </button>
+    return <>
+      <button onClick={e => {
+        this.activateProfile(profile)
+      }}>
+        {profile.user.username}
+      </button>
+      {" "}
+      {profile.lastConnected}
+    </>
   }
 
   async activateProfile(profile) {
@@ -83,7 +87,7 @@ class ProfileList extends PureComponent {
   }
 }
 
-class EmbeddedBrowser extends PureComponent {
+class EmbeddedBrowser extends React.PureComponent {
   constructor() {
     super()
     this.state = {}
@@ -165,12 +169,28 @@ class EmbeddedBrowser extends PureComponent {
   }
 }
 
-class App extends PureComponent {
+class App extends React.PureComponent {
+  // force load first profile for now
+  async componentDidMount() {
+    let res = await Butler.call("Profile.List")
+
+    // find the most recently connected profile and use that as the default
+    if (res.profiles) {
+      const profiles = [...res.profiles]
+      profiles.sort((a,b) => new Date(b.lastConnected) - new Date(a.lastConnected))
+
+      if (profiles[0]) {
+        setGlobalState({ currentProfile: profiles[0] })
+      }
+    }
+  }
+
   render() {
     return <HashRouter>
       <Header />
       <Routes>
         <Route path="/profiles" element={<ProfileList />} />
+        <Route path="/collections" element={<ProfileCollections />} />
         <Route path="/browser" element={<EmbeddedBrowser src="https://itch.io" />} />
         <Route path="/versions" element={
           <div>

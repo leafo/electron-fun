@@ -53,6 +53,7 @@ export default Header = () => {
 
   return <HeaderDiv>
     <NavLink to="/profiles">Profiles</NavLink>
+    {profile ? <NavLink to="/collections">Collections</NavLink> : null}
     <NavLink to="/browser">Browser</NavLink>
     <NavLink to="/versions">Versions</NavLink>
 
