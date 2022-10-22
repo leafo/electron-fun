@@ -1,5 +1,5 @@
 import React from "react"
-import {render} from "react-dom"
+import {createRoot} from "react-dom/client"
 
 import { HashRouter, Routes, Route, Link, NavLink } from "react-router-dom"
 
@@ -116,5 +116,5 @@ class App extends React.PureComponent {
   }
 }
 
-render(<App />, document.getElementById("app"))
+createRoot(document.getElementById("app")).render(<App />)
 
