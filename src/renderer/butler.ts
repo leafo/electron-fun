@@ -16,8 +16,12 @@ export const useButlerCall = (method, params) => {
     }
   }
 
-  useEffect(async () => {
-    setResult(await Butler.call(method, params))
+  useEffect(() => {
+    async function call() {
+      setResult(await Butler.call(method, params))
+    }
+
+    call().catch(console.error)
   }, deps)
 
   return result
